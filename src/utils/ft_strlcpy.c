@@ -13,7 +13,6 @@ int ft_strlcpy(char *dest, const char *src, int size)
       i += 1;
     }
     dest[i] = '\0';
-    // /!\ MUST OPTIMIZE: Fill the remaining pointer by '\0'.
   }
   while (*src && src[i])
   {
