@@ -13,15 +13,19 @@ FLAWFINDER := flawfinder
 
 ANALYSIS_DIR := analysis
 
-# Compiler flags
-CFLAGS := \
-	-std=c17 \
-	-fstack-protector-strong \
-	-fstack-clash-protection \
-	-fcf-protection=full \
-	-D_FORTIFY_SOURCE=3 \
-	-fPIE \
-	-fPIC \
+SRC_DIR := src
+
+# Source files
+SRC_FILES := $(shell find $(SRC_DIR) -type f -name '*.c')
+# Object files
+OBJ_FILES := $(patsubst %.c,%.o,$(SRC_FILES))
+# Executable name
+EXEC := trendstarbooks
+
+LIBS := \
+	-lmariadb
+
+WARNINGS := \
 	-Wall \
 	-Wextra \
 	-Wpedantic \
@@ -47,26 +51,29 @@ CFLAGS := \
 	-Wlogical-op \
 	-Wpointer-arith \
 	-Wredundant-decls \
+	-Wbad-function-cast \
+	-Wmissing-prototypes \
+	-Wno-unused-function \
+	-Wno-unused-variable
+
+# Compiler flags
+CFLAGS := $(WARNINGS) \
+	-std=c17 \
+	-fstack-protector-strong \
+	-fPIE \
+	-fPIC \
+	-D_FORTIFY_SOURCE=2 \
 	-O2 \
+	-fstack-clash-protection \
+	-fcf-protection=full \
 	-g3 \
-	-fno-omit-frame-pointer \
 	-fno-common \
 	-fno-plt \
+	-fsanitize=address,undefined,leak \
+	-fno-omit-frame-pointer \
 	-fvisibility=hidden
-
-	# -Wbad-function-cast
-	# -Wmissing-prototypes
 	# -D_GLIBCXX_ASSERTIONS
-	# -Wno-unused-function
-	# -Wno-unused-variable
-	# -fsanitize=address
-	# -fsanitize=address
-	# -fsanitize=undefined
-	# -fsanitize=leak
 	# -fsanitize-address-use-after-scope
-
-LIBS := \
-	-lmariadb
 
 # Linker flags
 LDFLAGS := \
@@ -76,14 +83,10 @@ LDFLAGS := \
 	-Wl,-z,defs \
 	-Wl,--as-needed \
 	-Wl,--no-undefined \
-	-pie \
+	-pie
 
-# Source files
-SRC_DIR := src
-SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
-
-# Includes files
-INCLUDES := \
+# Include Directories
+INCLUDE := \
 	-I./$(SRC_DIR) \
 	-I./$(SRC_DIR)/controller \
 	-I./$(SRC_DIR)/model \
@@ -91,22 +94,14 @@ INCLUDES := \
 	-I./$(SRC_DIR)/utils \
 	-I./$(SRC_DIR)/view
 
-# Object files
-OBJS := $(SRC_FILES:.c=.o)
-
-# Executable name
-EXEC := trendstarbooks
-
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
-	@echo -n "=== GENERATE *.o - START ===\n"
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-	@echo -n "=== GENERATE *.o - END ===\n"
+%.o: %.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDE) -c $< -o $@
 
 all: $(EXEC)
 
-$(EXEC): $(OBJS)
-	@echo -n "=== BUILD BINARY FILE - START ===\n"
-	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $@ $(LDFLAGS)
+$(EXEC): $(OBJ_FILES)
+	@echo -n "\n=== BUILD BINARY FILE - START ===\n"
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDE) $(OBJ_FILES) -o $@
 	@echo -n "=== BUILD BINARY FILE - END ===\n"
 
 analyze: \
@@ -115,14 +110,14 @@ analyze: \
 	analyze-cppcheck \
 	analyze-flawfinder
 
-run: $(EXEC)
-	@echo -n "=== EXECUTE BINARY - START ===\n"
+run: $(EXEC) analyze
+	@echo -n "=== EXECUTE BINARY - START ===\n\n"
 	./$(EXEC)
-	@echo -n "=== EXECUTE BINARY - END ===\n"
+	@echo -n "\n\n=== EXECUTE BINARY - END ===\n"
 
 clean:
 	@echo -n "=== CLEANING - START ===\n"
-	@rm -vrf $(ANALYSIS_DIR) $(OBJS) $(EXEC)
+	@rm -vrf $(ANALYSIS_DIR) $(OBJ_FILES) $(EXEC)
 	@echo -n "=== CLEANING - END ===\n"
 
 .PHONY: all analyze run clean
@@ -147,7 +142,10 @@ $(ANALYSIS_DIR)/report_clang.txt: $(SRC_FILES)
 
 $(ANALYSIS_DIR)/report_cppcheck.txt: $(SRC_FILES)
 	@echo -n "Running cppcheck analysis...\n"
-	@$(CPPCHECK) --enable=all --inconclusive --check-config --std=c17 $(INCLUDES) $(SRC_DIR) > $@ 2>&1 || true
+	@$(CPPCHECK) \
+		--suppress=missingIncludeystem \
+		--enable=all --inconclusive --check-config --std=c17 \
+		$(INCLUDE) $(SRC_DIR) > $@ 2>&1 || true
 	@echo -n "Analysis report generated at $@\n"
 
 $(ANALYSIS_DIR)/report_flawfinder.txt: $(SRC_FILES)

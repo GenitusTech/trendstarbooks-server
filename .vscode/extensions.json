@@ -1,7 +1,14 @@
 {
   "recommendations": [
     "editorconfig.editorconfig",
-    "ms-vscode.makefile-tools",
-    "spmeesseman.vscode-taskexplorer"
+    "yzhang.markdown-all-in-one",
+    "redhat.vscode-yaml",
+    "usernamehw.errorlens",
+    "jock.svg",
+    "franneck94.workspace-formatter",
+    "adpyke.codesnap",
+    "jbenden.c-cpp-flylint",
+    "ms-vscode.cpptools-extension-pack",
+    "ms-vscode.makefile-tools"
   ]
 }
