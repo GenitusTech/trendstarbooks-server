@@ -59,21 +59,21 @@ WARNINGS := \
 # Compiler flags
 CFLAGS := $(WARNINGS) \
 	-std=c17 \
+	-D_FORTIFY_SOURCE=2 \
+	-D_GLIBCXX_ASSERTIONS \
+	-O2 \
+	-g3 \
+	-fstack-clash-protection \
 	-fstack-protector-strong \
 	-fPIE \
 	-fPIC \
-	-D_FORTIFY_SOURCE=2 \
-	-O2 \
-	-fstack-clash-protection \
 	-fcf-protection=full \
-	-g3 \
 	-fno-common \
 	-fno-plt \
 	-fsanitize=address,undefined,leak \
+	-fsanitize-address-use-after-scope \
 	-fno-omit-frame-pointer \
 	-fvisibility=hidden
-	# -D_GLIBCXX_ASSERTIONS
-	# -fsanitize-address-use-after-scope
 
 # Linker flags
 LDFLAGS := \
