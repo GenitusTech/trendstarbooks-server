@@ -2,8 +2,8 @@
 #define LIBRARIES_H_
 
 #include <bsd/string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 void ft_putchar(char c);

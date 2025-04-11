@@ -23,38 +23,41 @@ OBJ_FILES := $(patsubst %.c,%.o,$(SRC_FILES))
 EXEC := trendstarbooks
 
 LIBS := \
+	-lpthread \
 	-lmariadb
 
 WARNINGS := \
 	-Wall \
-	-Wextra \
-	-Wpedantic \
-	-Werror \
+	-Warray-bounds=2 \
+	-Wbad-function-cast \
+	-Wcast-align \
+	-Wcast-qual \
 	-Wconversion \
+	-Wdeprecated \
+	-Wdouble-promotion \
+	-Wduplicated-cond \
+	-Wduplicated-branches \
+	-Werror \
+	-Wextra \
+	-Wfloat-equal \
 	-Wformat=2 \
 	-Wformat-security \
+	-Wlogical-op \
+	-Wmissing-prototypes \
+	-Wno-unused-function \
+	-Wno-unused-variable \
 	-Wnull-dereference \
+	-Wpedantic \
+	-Wpointer-arith \
+	-Wredundant-decls \
+	-Wshadow \
+	-Wsign-conversion \
 	-Wstack-protector \
 	-Wstrict-overflow \
 	-Wstrict-prototypes \
-	-Wwrite-strings \
-	-Warray-bounds=2 \
-	-Wcast-align \
-	-Wcast-qual \
-	-Wdouble-promotion \
-	-Wduplicated-branches \
-	-Wduplicated-cond \
-	-Wfloat-equal \
-	-Wshadow \
 	-Wundef \
 	-Wunused \
-	-Wlogical-op \
-	-Wpointer-arith \
-	-Wredundant-decls \
-	-Wbad-function-cast \
-	-Wmissing-prototypes \
-	-Wno-unused-function \
-	-Wno-unused-variable
+	-Wwrite-strings \
 
 # Compiler flags
 CFLAGS := $(WARNINGS) \

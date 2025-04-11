@@ -10,6 +10,12 @@
     "jbenden.c-cpp-flylint",
     "ms-vscode.cpptools-extension-pack",
     "ms-vscode.makefile-tools",
-    "kylinideteam.cmake-intellisence"
+    "kylinideteam.cmake-intellisence",
+    "josetr.cmake-language-support-vscode",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "msazurermtools.azurerm-vscode-tools",
+    "ms-vscode.cmake-tools",
+    "cheshirekow.cmake-format",
+    "ms-vscode.cpptools"
   ]
 }

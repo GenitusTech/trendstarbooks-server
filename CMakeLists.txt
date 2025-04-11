@@ -109,7 +109,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   )
   add_link_options(-fsanitize=address,undefined,leak)
 endif()
-message(">>>x ${CMAKE_HAVE_LIBC_PTHREAD}") # Security hardening flags
+
+# message(">>>x ${CMAKE_BUILD_TYPE}") # Security hardening flags
 # add_compile_options( -Wall -Wextra -Wpedantic # Strict warnings
 # -Werror=implicit-function-declaration # Catch missing declarations
 # -fstack-protector-strong           # Stack protection -fPIE -fPIC # Position

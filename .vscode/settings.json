@@ -215,5 +215,19 @@
   "c-cpp-flylint.clang.executable": "clang-19",
   "c-cpp-flylint.flexelint.enable": false,
   "c-cpp-flylint.lizard.enable": false,
-  "C_Cpp.errorSquiggles": "disabled"
+  "C_Cpp.errorSquiggles": "enabled",
+  "dotnetAcquisitionExtension.enablePreviewFeatures": true,
+  "dotnetAcquisitionExtension.existingDotnetPath": [
+    {
+      "extensionId": "msazurermtools.azurerm-vscode-tools",
+      "path": "/usr/bin/dotnet"
+    }
+  ],
+  "azureResourceManagerTools.codelens.enable": true,
+  "cmakeFormat.exePath": "cmake-format",
+  "cmakeFormat.args": [
+    "--enable-sort=true",
+    "--line-ending=unix"
+  ],
+  "C_Cpp.autocompleteAddParentheses": true
 }
