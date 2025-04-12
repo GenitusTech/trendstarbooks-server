@@ -1,12 +1,14 @@
-#include "libraries.h"
+#include "server.h"
+#include <stdlib.h>
+
+#define PORT 8080
 
 int main(void)
 {
-  char *text;
+  Server server;
 
-  text = (char *) malloc(sizeof(char) * 11);
-  (void) ft_strlcpy(text, "TEST 1 2 3", 11);
-  ft_putstr(text);
-  free(text);
+  init_server(&server, PORT);
+  start_server(&server);
+
   return (EXIT_SUCCESS);
 }

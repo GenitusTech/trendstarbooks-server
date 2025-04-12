@@ -57,9 +57,11 @@ WARNINGS := \
 	-Wstrict-prototypes \
 	-Wundef \
 	-Wunused \
-	-Wwrite-strings \
+	-Wwrite-strings
 
 # Compiler flags
+# -D_POSIX_C_SOURCE=200809L
+
 CFLAGS := $(WARNINGS) \
 	-std=c17 \
 	-D_FORTIFY_SOURCE=2 \
@@ -93,14 +95,13 @@ INCLUDE := \
 	-I./$(SRC_DIR) \
 	-I./$(SRC_DIR)/controller \
 	-I./$(SRC_DIR)/model \
-	-I./$(SRC_DIR)/router \
 	-I./$(SRC_DIR)/utils \
 	-I./$(SRC_DIR)/view
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(INCLUDE) -c $< -o $@
 
-all: $(EXEC)
+all: clean $(EXEC)
 
 $(EXEC): $(OBJ_FILES)
 	@echo -n "\n=== BUILD BINARY FILE - START ===\n"
@@ -146,7 +147,7 @@ $(ANALYSIS_DIR)/report_clang.txt: $(SRC_FILES)
 $(ANALYSIS_DIR)/report_cppcheck.txt: $(SRC_FILES)
 	@echo -n "Running cppcheck analysis...\n"
 	@$(CPPCHECK) \
-		--suppress=missingIncludeystem \
+		--suppress=missingIncludeystem --error-exitcode=1 \
 		--enable=all --inconclusive --check-config --std=c17 \
 		$(INCLUDE) $(SRC_DIR) > $@ 2>&1 || true
 	@echo -n "Analysis report generated at $@\n"

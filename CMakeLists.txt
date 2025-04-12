@@ -21,7 +21,7 @@ option(SERVER_ENABLE_STACK_PROTECTION "Enable stack protection" ON)
 option(SERVER_ENABLE_ASAN "Enable Address Sanitizer" OFF)
 option(SERVER_ENABLE_UBSAN "Enable Undefined Behavior Sanitizer" OFF)
 
-set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -49,6 +49,7 @@ target_link_libraries(${PROJECT_NAME}
 
 if(SERVER_ENABLE_HARDENING)
   add_compile_options(
+    -D_POSIX_C_SOURCE=200809L
     -fstack-protector-strong # Stack protection
     -fPIE
     -fPIC # Position Independent Executable/Code
