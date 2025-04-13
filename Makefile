@@ -4,12 +4,25 @@ CC := gcc-12
 ## Debug Tools: splint clang cppcheck flawfinder
 # SPLINT (v.3)
 SPLINT := splint
+SPLINT_OPTS := \
+	+posixlib -weak -warnposix -preproc -retvalint \
+	-nullpass -unrecog -paramuse -compdestroy -mustfreefresh \
+	-nullstate -globstate -fullinitblock -predboolint
 # CLANG (v.19)
 CLANG := clang-19
+CLANG_OPTS := \
+	-std=c99 --analyze -Xanalyzer -analyzer-output=text \
+	-Weverything -Wno-unknown-warning-option
 # CPPCHECK (v.2)
 CPPCHECK := cppcheck
+CPPCHECK_OPTS :=  \
+	--std=c99 --enable=all --inconclusive \
+	--suppress=missingIncludeSystem --suppress=unusedFunction \
+	--suppress=variableScope
 # FLAWFINDER (v.2)
 FLAWFINDER := flawfinder
+FLAWFINDER_OPTS := --quiet --minlevel=5
+
 
 # Analysis Directory
 ANALYSIS_DIR := analysis
@@ -112,10 +125,35 @@ $(TARGET): $(OBJ_FILES)
 clean:
 	@$(RM) -frv $(OBJ_FILES) $(TARGET)
 
-.PHONY: all clean debug production
+.PHONY: all clean debug production analyze security-scan
 
 debug:
 	@$(MAKE) BUILD=debug
 
 production:
 	@$(MAKE) BUILD=production
+
+security-scan: \
+	analyze-flawfinder \
+	# analyze-cppcheck \
+	# analyze-splint \
+	# analyze-clang
+
+analyze-flawfinder:
+	@echo "=== Running Flawfinder (Security Scanner) ==="
+	$(FLAWFINDER) $(FLAWFINDER_OPTS) $(SRC_FILES)
+
+analyze-cppcheck:
+	@echo "=== Running Cppcheck (Static Analysis) ==="
+	$(CPPCHECK) $(CPPCHECK_OPTS) $(SRC_FILES)
+
+analyze-splint:
+	@echo "=== Running Splint (Lint++) ==="
+	$(SPLINT) $(SPLINT_OPTS) $(SRC_FILES)
+
+analyze-clang:
+	@echo "=== Running Clang Static Analyzer ==="
+	$(CLANG_SCAN) $(CLANG_OPTS) $(SRC_FILES)
+
+analyze: clean
+	$(MAKE) security-scan
