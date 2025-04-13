@@ -38,8 +38,8 @@ void init_server(Server *server, int port)
   server_instance = server;
 
   // Set up signal handling
-  signal(SIGINT, handle_signal);
-  signal(SIGTERM, handle_signal);
+  (void) signal(SIGINT, handle_signal);
+  (void) signal(SIGTERM, handle_signal);
 
   // Create socket
   server->server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -51,7 +51,7 @@ void init_server(Server *server, int port)
 
   opt = 1;
   // Set socket options to prevent "address already in use" errors
-  if (setsockopt(server->server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+  if (setsockopt(server->server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, (socklen_t) sizeof(opt)) < 0)
   {
     perror("error: setsockopt");
     close(server->server_fd);
@@ -61,10 +61,10 @@ void init_server(Server *server, int port)
   // Configure server address
   server->server_addr.sin_family = AF_INET;
   server->server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // Inet 127.0.0.1 => localhost only
-  server->server_addr.sin_port = htons((uint16_t) port);
+  server->server_addr.sin_port = (in_port_t) port;
 
   // Bind socket to (localhost) address
-  if (bind(server->server_fd, (struct sockaddr *) &server->server_addr, sizeof(server->server_addr)) < 0)
+  if (bind(server->server_fd, (struct sockaddr *) &server->server_addr, (socklen_t) sizeof(server->server_addr)) < 0)
   {
     perror("Binding socket to address failed");
     close(server->server_fd);
@@ -84,7 +84,7 @@ void start_server(Server *server)
     exit(EXIT_FAILURE);
   }
 
-  printf("Server started on port %hu\n", ntohs(server->server_addr.sin_port));
+  printf("Server started on port %hu\n", (unsigned short int) server->server_addr.sin_port);
   server->running = 1; // TRUE
 
   while (server->running)
@@ -94,7 +94,7 @@ void start_server(Server *server)
     int client_fd;
 
     // Accept client incoming connection
-    client_len = sizeof(client_addr);
+    client_len = (socklen_t) sizeof(client_addr);
     client_fd = accept(server->server_fd, (struct sockaddr *) &client_addr, &client_len);
     if (client_fd < 0)
     {

@@ -18,6 +18,7 @@ CPPCHECK := cppcheck
 CPPCHECK_OPTS :=  \
 	--std=c99 --enable=all --inconclusive \
 	--suppress=missingIncludeSystem --suppress=unusedFunction \
+	--suppress=unmatchedSuppression \
 	--suppress=variableScope
 # FLAWFINDER (v.2)
 FLAWFINDER := flawfinder
@@ -32,6 +33,7 @@ SRC_DIR := src
 # Executable name
 TARGET := trendstarbooks
 # Source files
+HEAD_FILES := $(shell find $(SRC_DIR) -type f -name '*.h')
 SRC_FILES := $(shell find $(SRC_DIR) -type f -name '*.c')
 # Object files
 OBJ_FILES := $(patsubst %.c,%.o,$(SRC_FILES))
@@ -125,35 +127,22 @@ $(TARGET): $(OBJ_FILES)
 clean:
 	@$(RM) -frv $(OBJ_FILES) $(TARGET)
 
-.PHONY: all clean debug production analyze security-scan
+analyze: analyze-flawfinder analyze-cppcheck	analyze-splint analyze-clang
 
-debug:
-	@$(MAKE) BUILD=debug
-
-production:
-	@$(MAKE) BUILD=production
-
-security-scan: \
-	analyze-flawfinder \
-	# analyze-cppcheck \
-	# analyze-splint \
-	# analyze-clang
+.PHONY: all clean debug production analyze
 
 analyze-flawfinder:
-	@echo "=== Running Flawfinder (Security Scanner) ==="
-	$(FLAWFINDER) $(FLAWFINDER_OPTS) $(SRC_FILES)
+	@echo "\n=== Running Flawfinder (Security Scanner) ==="
+	$(FLAWFINDER) $(FLAWFINDER_OPTS) $(HEAD_FILES) $(SRC_FILES)
 
 analyze-cppcheck:
-	@echo "=== Running Cppcheck (Static Analysis) ==="
-	$(CPPCHECK) $(CPPCHECK_OPTS) $(SRC_FILES)
+	@echo "\n=== Running Cppcheck (Static Analysis) ==="
+	$(CPPCHECK) $(CPPCHECK_OPTS) $(HEAD_FILES) $(SRC_FILES)
 
 analyze-splint:
-	@echo "=== Running Splint (Lint++) ==="
-	$(SPLINT) $(SPLINT_OPTS) $(SRC_FILES)
+	@echo "\n=== Running Splint (Lint++) ==="
+	$(SPLINT) $(SPLINT_OPTS) $(HEAD_FILES) $(SRC_FILES)
 
 analyze-clang:
-	@echo "=== Running Clang Static Analyzer ==="
-	$(CLANG_SCAN) $(CLANG_OPTS) $(SRC_FILES)
-
-analyze: clean
-	$(MAKE) security-scan
+	@echo "\n=== Running Clang Static Analyzer ==="
+	$(CLANG) $(CLANG_OPTS) $(HEAD_FILES) $(SRC_FILES)

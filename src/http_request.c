@@ -6,7 +6,7 @@
 
 void handle_request(int fd)
 {
-  char buffer[BUFFER_SIZE] = {0};
+  char buffer[BUFFER_SIZE] = "";
   ssize_t bytes_read;
 
   // Read request
