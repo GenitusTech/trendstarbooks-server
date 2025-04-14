@@ -13,7 +13,10 @@ typedef struct
   sig_atomic_t running;
 } Server;
 
+void handle_signal(int signal);
+void *handle_client(void *arg);
 void init_server(Server *server, int port);
 void start_server(Server *server);
+void close_connection(int fd);
 
 #endif // SERVER_H_

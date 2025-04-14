@@ -1,13 +1,18 @@
 #include "server.h"
 #include "http_request.h"
+#include "http_response.h"
+// #include "middleware.h"
 // #include "router.h"
+#include <arpa/inet.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 Server *server_instance = NULL;
 
-static void handle_signal(int signal)
+void handle_signal(int signal)
 {
   if (signal == SIGINT || signal == SIGTERM)
   {
@@ -18,16 +23,19 @@ static void handle_signal(int signal)
   }
 }
 
-static void close_connection(int fd)
+void *handle_client(void *arg)
 {
-  if (shutdown(fd, SHUT_RDWR) < 0)
-  {
-    perror("Connection could not shutdown");
-  }
-  if (close(fd) < 0)
-  {
-    perror("File descriptior could not close");
-  }
+  HttpRequest http_request;
+  HttpResponse http_response;
+
+  int client_fd;
+
+  client_fd = *(int *) arg;
+  (void) client_fd;
+  (void) http_request;
+  (void) http_response;
+
+  return (NULL);
 }
 
 void init_server(Server *server, int port)
@@ -61,7 +69,7 @@ void init_server(Server *server, int port)
   // Configure server address
   server->server_addr.sin_family = AF_INET;
   server->server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // Inet 127.0.0.1 => localhost only
-  server->server_addr.sin_port = (in_port_t) port;
+  server->server_addr.sin_port = ntohs((uint16_t) port);
 
   // Bind socket to (localhost) address
   if (bind(server->server_fd, (struct sockaddr *) &server->server_addr, (socklen_t) sizeof(server->server_addr)) < 0)
@@ -84,7 +92,7 @@ void start_server(Server *server)
     exit(EXIT_FAILURE);
   }
 
-  printf("Server started on port %hu\n", (unsigned short int) server->server_addr.sin_port);
+  printf("Server starting on port %hu\n", ntohs(server->server_addr.sin_port));
   server->running = 1; // TRUE
 
   while (server->running)
@@ -92,6 +100,8 @@ void start_server(Server *server)
     struct sockaddr_in client_addr;
     socklen_t client_len;
     int client_fd;
+    char client_ip[INET_ADDRSTRLEN];
+    pthread_t thread_id;
 
     // Accept client incoming connection
     client_len = (socklen_t) sizeof(client_addr);
@@ -100,13 +110,23 @@ void start_server(Server *server)
     {
       if (server->running)
       {
-        perror("Accept failed");
+        perror("Client incoming connection acceptance failed");
       }
       continue;
     }
 
-    // Read client request
-    handle_request(client_fd);
+    // Get client IP
+    inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
+
+    // Create thread
+    if (pthread_create(&thread_id, NULL, handle_client, &client_fd))
+    {
+      perror("error: pthread_create");
+      close_connection(client_fd);
+      continue;
+    }
+    // Detach thread -> FREE when terminate is completed
+    pthread_detach(thread_id);
 
     // Properly close connection
     close_connection(client_fd);
@@ -115,4 +135,16 @@ void start_server(Server *server)
   server->running = 0; // FALSE
   close_connection(server->server_fd);
   printf("Server stopped\n");
+}
+
+void close_connection(int fd)
+{
+  if (shutdown(fd, SHUT_RDWR) < 0)
+  {
+    perror("Connection could not shutdown");
+  }
+  if (close(fd) < 0)
+  {
+    perror("File descriptior could not close");
+  }
 }
