@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -25,16 +26,19 @@ void handle_signal(int signal)
 
 void *handle_client(void *arg)
 {
-  HttpRequest http_request;
-  HttpResponse http_response;
-
   int client_fd;
+  char buffer[BUFFER_SIZE];
+  ssize_t bytes_read;
 
   client_fd = *(int *) arg;
-  (void) client_fd;
-  (void) http_request;
-  (void) http_response;
-
+  memset(buffer, '\0', BUFFER_SIZE);
+  bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
+  if (bytes_read <= 0)
+  {
+    perror("file descriptor reading failed");
+    return (NULL);
+  }
+  close_connection(client_fd);
   return (NULL);
 }
 
@@ -108,10 +112,7 @@ void start_server(Server *server)
     client_fd = accept(server->server_fd, (struct sockaddr *) &client_addr, &client_len);
     if (client_fd < 0)
     {
-      if (server->running)
-      {
-        perror("Client incoming connection acceptance failed");
-      }
+      perror("Client incoming connection acceptance failed");
       continue;
     }
 
@@ -127,9 +128,6 @@ void start_server(Server *server)
     }
     // Detach thread -> FREE when terminate is completed
     pthread_detach(thread_id);
-
-    // Properly close connection
-    close_connection(client_fd);
   }
 
   server->running = 0; // FALSE
