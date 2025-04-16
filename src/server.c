@@ -1,6 +1,7 @@
 #include "server.h"
 #include "http_request.h"
 #include "http_response.h"
+#include "utils/libft.h"
 // #include "middleware.h"
 // #include "router.h"
 #include <arpa/inet.h>
@@ -24,6 +25,18 @@ void handle_signal(int signal)
   }
 }
 
+void close_connection(int fd)
+{
+  if (shutdown(fd, SHUT_RDWR) < 0)
+  {
+    perror("Connection could not shutdown");
+  }
+  if (close(fd) < 0)
+  {
+    perror("File descriptior could not close");
+  }
+}
+
 void *handle_client(void *arg)
 {
   int client_fd;
@@ -36,10 +49,11 @@ void *handle_client(void *arg)
   if (bytes_read <= 0)
   {
     perror("file descriptor reading failed");
-    return (NULL);
+    return (0);
   }
+
   close_connection(client_fd);
-  return (NULL);
+  return (0);
 }
 
 void init_server(Server *server, int port)
@@ -133,16 +147,4 @@ void start_server(Server *server)
   server->running = 0; // FALSE
   close_connection(server->server_fd);
   printf("Server stopped\n");
-}
-
-void close_connection(int fd)
-{
-  if (shutdown(fd, SHUT_RDWR) < 0)
-  {
-    perror("Connection could not shutdown");
-  }
-  if (close(fd) < 0)
-  {
-    perror("File descriptior could not close");
-  }
 }

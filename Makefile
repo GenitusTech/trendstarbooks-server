@@ -23,7 +23,12 @@ CPPCHECK_OPTS :=  \
 # FLAWFINDER (v.2)
 FLAWFINDER := flawfinder
 FLAWFINDER_OPTS := --quiet --minlevel=5
-
+# CHECKSEC (v.2)
+CHECKSEC := checksec
+CHECKSEC_OPTS := --debug --file=
+# VALGRIND (v.3)
+VALGRIND := valgrind
+VALGRIND_OPTS := -s --leak-check=full
 
 # Analysis Directory
 ANALYSIS_DIR := analysis
@@ -83,6 +88,7 @@ BUILD = debug
 endif
 
 ifeq ($(BUILD),production)
+CC += -s# Strip Symbols during compilation
 # Security & Hardening Flags
 CFLAGS += -O2# Optimizes for performance (enables D_FORTIFY_SOURCE)
 CFLAGS += -D_FORTIFY_SOURCE=3# untime buffer overflow checks (requires -O2)
@@ -96,6 +102,8 @@ LDFLAGS += -pie# ASLR-enabled executable
 endif
 
 ifeq ($(BUILD),debug)
+CC += -ggdb
+
 CFLAGS += -Og#
 CFLAGS += -g3# Adds debug symbols (useful for gdb)
 CFLAGS += -fsanitize=undefined -fsanitize=address -fsanitize=leak
@@ -112,14 +120,17 @@ INCLUDE := \
 	-I./$(SRC_DIR)/middleware \
 	-I./$(SRC_DIR)/model \
 	-I./$(SRC_DIR)/utils \
+	-I./$(SRC_DIR)/utils/libft \
 	-I./$(SRC_DIR)/view
 
 LIBS = -lpthread
 
-all: $(TARGET)
+all: clean $(TARGET)
 
 $(TARGET): $(OBJ_FILES)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDE) $(LIBS) -o $@ $^
+	$(CHECKSEC) $(CHECKSEC_OPTS)$@
+	$(VALGRIND) $(VALGRIND_OPTS) ./$@ test
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -127,7 +138,7 @@ $(TARGET): $(OBJ_FILES)
 clean:
 	@$(RM) -frv $(OBJ_FILES) $(TARGET)
 
-analyze: analyze-flawfinder analyze-cppcheck	analyze-splint analyze-clang
+analyze: analyze-flawfinder analyze-cppcheck analyze-splint analyze-clang
 
 .PHONY: all clean debug production analyze
 

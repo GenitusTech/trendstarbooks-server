@@ -2,19 +2,24 @@
 
 char *ft_strdup(const char *str)
 {
-  int i;
+  size_t len;
   char *buffer;
 
-  i = 0;
-  buffer = (char *) malloc(sizeof(char) * ft_strlen(str) + 1);
-  if (!buffer) {
-    return (NULL);
-  }
-  while (str[i])
+  if (!str)
   {
-    buffer[i] = str[i];
-    i += 1;
+    return (0);
   }
-  buffer[i] = '\0';
+  len = ft_strlen(str);
+  buffer = (char *) malloc(sizeof(char) * len + 1);
+  if (!buffer)
+  {
+    return (0);
+  }
+  ft_memset(buffer, '\0', len + 1);
+  while (len)
+  {
+    buffer[len] = str[len];
+    len -= 1;
+  }
   return (buffer);
 }
