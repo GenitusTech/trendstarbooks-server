@@ -13,8 +13,6 @@ void handle_client_request(int fd)
   // HttpRequest *http_request;
   // HttpResponse *http_response;
 
-
-
   // char buffer[BUFFER_SIZE];
   // Get client request information as text
   // memset(buffer, '\0', BUFFER_SIZE);

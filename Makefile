@@ -43,6 +43,8 @@ SRC_FILES := $(shell find $(SRC_DIR) -type f -name '*.c')
 # Object files
 OBJ_FILES := $(patsubst %.c,%.o,$(SRC_FILES))
 
+TEMP_FILES := $(shell find . -type f -name "*.h.pch")
+
 # Standard Compliance & Strictness
 CFLAGS += -std=c99# Enforces strict C99 compliance
 CFLAGS += -pedantic# Rejects non-standard GNU extensions
@@ -136,7 +138,7 @@ $(TARGET): $(OBJ_FILES)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@$(RM) -frv $(OBJ_FILES) $(TARGET)
+	@$(RM) -frv $(OBJ_FILES) $(TARGET) $(TEMP_FILES)
 
 analyze: analyze-flawfinder analyze-cppcheck analyze-splint analyze-clang
 

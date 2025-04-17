@@ -12,17 +12,57 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-Server *server_instance = NULL;
+Server *server_instance = 0;
 
 void handle_signal(int signal)
 {
   if (signal == SIGINT || signal == SIGTERM)
   {
-    if (server_instance != NULL)
+    if (server_instance != 0)
     {
       server_instance->running = 0; // FALSE
     }
   }
+}
+
+void *handle_client(void *arg)
+{
+  int client_fd;
+  char client_ip[INET_ADDRSTRLEN];
+  char raw_content[BUFFER_SIZE];
+  HttpRequest *http_request;
+
+  client_fd = *(int *) arg;
+
+  // Get client IP
+  ft_memset(client_ip, '\0', INET_ADDRSTRLEN);
+  get_client_ip(client_fd, client_ip);
+
+  // Get client buffer content
+  ft_memset(raw_content, '\0', BUFFER_SIZE);
+  get_client_content(client_fd, raw_content, BUFFER_SIZE);
+
+  close_connection(client_fd);
+
+  http_request = (HttpRequest *) malloc(sizeof(HttpRequest));
+  if (!http_request)
+  {
+    perror("could not allocate for HttpRequest");
+    return (0);
+  }
+
+  // char *line = strtok(raw_content, "\n");
+
+  sscanf(raw_content, "%s %s", http_request->method, http_request->path);
+  strcpy(http_request->body, strstr(raw_content, "\r\n\r\n"));
+
+  printf("Method: %s\n", http_request->method);
+  printf("Path: %s\n", http_request->path);
+  printf("Body: %s\n", http_request->body);
+
+  free(http_request);
+
+  return (0);
 }
 
 void close_connection(int fd)
@@ -35,25 +75,6 @@ void close_connection(int fd)
   {
     perror("File descriptior could not close");
   }
-}
-
-void *handle_client(void *arg)
-{
-  int client_fd;
-  char buffer[BUFFER_SIZE];
-  ssize_t bytes_read;
-
-  client_fd = *(int *) arg;
-  memset(buffer, '\0', BUFFER_SIZE);
-  bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
-  if (bytes_read <= 0)
-  {
-    perror("file descriptor reading failed");
-    return (0);
-  }
-
-  close_connection(client_fd);
-  return (0);
 }
 
 void init_server(Server *server, int port)
@@ -110,7 +131,7 @@ void start_server(Server *server)
     exit(EXIT_FAILURE);
   }
 
-  printf("Server starting on port %hu\n", ntohs(server->server_addr.sin_port));
+  printf("Server starting on port %hu\n", (unsigned short int) ntohs(server->server_addr.sin_port));
   server->running = 1; // TRUE
 
   while (server->running)
@@ -118,20 +139,20 @@ void start_server(Server *server)
     struct sockaddr_in client_addr;
     socklen_t client_len;
     int client_fd;
-    char client_ip[INET_ADDRSTRLEN];
     pthread_t thread_id;
 
-    // Accept client incoming connection
     client_len = (socklen_t) sizeof(client_addr);
+    // Accept client incoming connection
     client_fd = accept(server->server_fd, (struct sockaddr *) &client_addr, &client_len);
+
     if (client_fd < 0)
     {
-      perror("Client incoming connection acceptance failed");
+      if (server->running)
+      {
+        perror("Client incoming connection acceptance failed");
+      }
       continue;
     }
-
-    // Get client IP
-    inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
 
     // Create thread
     if (pthread_create(&thread_id, NULL, handle_client, &client_fd))
@@ -147,4 +168,34 @@ void start_server(Server *server)
   server->running = 0; // FALSE
   close_connection(server->server_fd);
   printf("Server stopped\n");
+}
+
+void get_client_ip(int client_fd, char *client_ip)
+{
+  struct sockaddr_in client_addr;
+  socklen_t client_len;
+
+  client_len = (socklen_t) sizeof(client_addr);
+
+  // Get client address from file descriptor
+  if (getpeername(client_fd, (struct sockaddr *) &client_addr, &client_len) != 0)
+  {
+    perror("Cannot retreive client address from file descriptor");
+    return;
+  }
+
+  inet_ntop(AF_INET, &(client_addr.sin_addr), (char *) client_ip, INET_ADDRSTRLEN);
+}
+
+void get_client_content(int client_fd, char *buffer, size_t buffer_size)
+{
+  // char buffer[BUFFER_SIZE];
+  ssize_t bytes_read;
+
+  bytes_read = read(client_fd, buffer, buffer_size - 1);
+  if (bytes_read <= 0)
+  {
+    perror("file descriptor reading failed");
+    return;
+  }
 }

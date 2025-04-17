@@ -13,13 +13,13 @@ size_t ft_strlcpy(char *dst, const char *src, size_t size)
   i = 0;
   if (size < len)
   {
-    ft_memset(dst, '\0', size);
+    (void) ft_memset(dst, '\0', size);
   }
   else
   {
-    ft_memset(dst, '\0', len + 1);
+    (void) ft_memset(dst, '\0', len + 1);
   }
-  while (src[i] && i < (size - 1))
+  while (i < (size - 1) && src[i] != '\0')
   {
     dst[i] = src[i];
     i += 1;

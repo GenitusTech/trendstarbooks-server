@@ -1,7 +1,7 @@
 #include "server.h"
 #include <stdlib.h>
 
-#define PORT 8080
+#define PORT 8088
 
 int main(void)
 {

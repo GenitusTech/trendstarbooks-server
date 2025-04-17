@@ -5,11 +5,11 @@
 
 struct SRequest
 {
-  char *method;
-  char *path;
-  char *protocol;
+  char method[16];
+  char path[256];
+  char protocol[16];
   char *headers;
-  char *body;
+  char body[3200];
 };
 typedef struct SRequest HttpRequest;
 

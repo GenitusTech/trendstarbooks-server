@@ -15,7 +15,7 @@ char *ft_strdup(const char *str)
   {
     return (0);
   }
-  ft_memset(buffer, '\0', len + 1);
+  buffer = ft_memset(buffer, '\0', len + 1);
   while (len)
   {
     buffer[len] = str[len];
