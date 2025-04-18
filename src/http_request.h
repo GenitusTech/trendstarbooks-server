@@ -5,17 +5,15 @@
 
 struct SRequest
 {
-  char method[16];
-  char path[256];
-  char protocol[16];
+  char *method;
+  char *path;
+  char *protocol;
   char *headers;
-  char body[3200];
+  char *body;
 };
 typedef struct SRequest HttpRequest;
 
-void handle_client_request(int fd);
-HttpRequest *get_request(int fd);
-// HttpRequest *parse_request(const char *raw_request);
-// void free_request(void);
+HttpRequest *get_client_request(const char *raw_content);
+void free_request(HttpRequest *req);
 
 #endif // HTTP_REQUEST_H_

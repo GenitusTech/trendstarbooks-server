@@ -35,32 +35,18 @@ void *handle_client(void *arg)
   client_fd = *(int *) arg;
 
   // Get client IP
-  ft_memset(client_ip, '\0', INET_ADDRSTRLEN);
+  (void) ft_memset(client_ip, '\0', INET_ADDRSTRLEN);
   get_client_ip(client_fd, client_ip);
 
   // Get client buffer content
-  ft_memset(raw_content, '\0', BUFFER_SIZE);
+  (void) ft_memset(raw_content, '\0', BUFFER_SIZE);
   get_client_content(client_fd, raw_content, BUFFER_SIZE);
 
   close_connection(client_fd);
 
-  http_request = (HttpRequest *) malloc(sizeof(HttpRequest));
-  if (!http_request)
-  {
-    perror("could not allocate for HttpRequest");
-    return (0);
-  }
+  http_request = get_client_request(raw_content);
 
-  // char *line = strtok(raw_content, "\n");
-
-  sscanf(raw_content, "%s %s", http_request->method, http_request->path);
-  strcpy(http_request->body, strstr(raw_content, "\r\n\r\n"));
-
-  printf("Method: %s\n", http_request->method);
-  printf("Path: %s\n", http_request->path);
-  printf("Body: %s\n", http_request->body);
-
-  free(http_request);
+  free_request(http_request);
 
   return (0);
 }
@@ -139,7 +125,7 @@ void start_server(Server *server)
     struct sockaddr_in client_addr;
     socklen_t client_len;
     int client_fd;
-    pthread_t thread_id;
+    // pthread_t thread_id;
 
     client_len = (socklen_t) sizeof(client_addr);
     // Accept client incoming connection
@@ -154,15 +140,16 @@ void start_server(Server *server)
       continue;
     }
 
-    // Create thread
-    if (pthread_create(&thread_id, NULL, handle_client, &client_fd))
-    {
-      perror("error: pthread_create");
-      close_connection(client_fd);
-      continue;
-    }
-    // Detach thread -> FREE when terminate is completed
-    pthread_detach(thread_id);
+    (void) handle_client((void *) &client_fd);
+    // // Create thread
+    // if (pthread_create(&thread_id, NULL, handle_client, &client_fd))
+    // {
+    //   perror("error: pthread_create");
+    //   close_connection(client_fd);
+    //   continue;
+    // }
+    // // Detach thread -> FREE when terminate is completed
+    // pthread_detach(thread_id);
   }
 
   server->running = 0; // FALSE
@@ -184,7 +171,7 @@ void get_client_ip(int client_fd, char *client_ip)
     return;
   }
 
-  inet_ntop(AF_INET, &(client_addr.sin_addr), (char *) client_ip, INET_ADDRSTRLEN);
+  (void) inet_ntop(AF_INET, &(client_addr.sin_addr), (char *) client_ip, INET_ADDRSTRLEN);
 }
 
 void get_client_content(int client_fd, char *buffer, size_t buffer_size)
