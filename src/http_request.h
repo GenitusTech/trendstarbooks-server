@@ -10,10 +10,12 @@ struct SRequest
   char *protocol;
   char *headers;
   char *body;
+  unsigned int header_count;
 };
 typedef struct SRequest HttpRequest;
 
-HttpRequest *get_client_request(const char *raw_content);
+HttpRequest *get_request(const char *raw_content);
+void parse_request(HttpRequest *http_request);
 void free_request(HttpRequest *req);
 
 #endif // HTTP_REQUEST_H_

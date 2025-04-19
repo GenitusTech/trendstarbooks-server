@@ -1,139 +1,178 @@
 #include "http_request.h"
 #include "http_response.h"
 #include "utils/libft.h"
-#include <string.h>
-// #include <netinet/in.h>
 #include <stdio.h>
-// #include <stdlib.h>
-// #include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 
 static char *custom_allocation(const char *str, size_t size)
 {
   char *data;
 
   data = (char *) malloc(sizeof(char) * size + 1);
-  (void) ft_memset(data, '\0', size + 1);
-  (void) ft_strlcpy(data, str, size + 1);
-  return (data);
-}
-
-static void get_request_first_line(HttpRequest *req, const char *str)
-{
-  unsigned int pos_start;
-  unsigned int pos_end;
-  unsigned int i;
-
-  pos_start = 0;
-  pos_end = 0;
-  i = 0;
-  while (str[pos_end] != '\0')
-  {
-    if (str[pos_end] == 32 || str[pos_end + 1] == '\0')
-    {
-      // Request: METHOD
-      if (i == 0 && (pos_end - pos_start) <= 8)
-      {
-        req->method = custom_allocation(str + pos_start, (pos_end - pos_start));
-      }
-      // Request: PATH
-      else if (i == 1 && (pos_end - pos_start) <= 256)
-      {
-        req->path = custom_allocation(str + pos_start, (pos_end - pos_start));
-      }
-      // Request: PROTOCOL
-      else if (i == 2 && (pos_end - pos_start) <= 12)
-      {
-        req->protocol = custom_allocation(str + pos_start, (pos_end - pos_start) + 1);
-      }
-      pos_start = pos_end + 1;
-      i += 1;
-    }
-    pos_end += 1;
-  }
-}
-
-HttpRequest *get_client_request(const char *raw_content)
-{
-  HttpRequest *http_request;
-  char *duplicate_content;
-  char *content_line;
-  unsigned int i;
-  size_t len;
-
-  http_request = (HttpRequest *) malloc(sizeof(HttpRequest));
-  if (!http_request)
+  if (!data)
   {
     return (0);
   }
+  (void) ft_memset(data, '\0', size + 1);
+  (void) ft_strlcpy(data, str, size);
+  return (data);
+}
 
-  // Initialize all fields to NULL
-  http_request->method = NULL;
-  http_request->path = NULL;
-  http_request->protocol = NULL;
-  http_request->headers = NULL;
-  http_request->body = NULL;
+static size_t get_request_first_line(HttpRequest *req, const char *str)
+{
+  size_t pos;
+  size_t prev_pos;
+  char *line;
+  unsigned short int occurence;
+
+  pos = (size_t) ft_strpos(str, "\n");
+  line = (char *) malloc(sizeof(char) * pos + 1);
+  if (!line)
+  {
+    perror("error: malloc");
+    return (0);
+  }
+  ft_memset(line, '\0', pos + 1);
+  ft_strlcpy(line, str, pos);
+
+  // Retreive Method & Path & Protocol
+  pos = 0;
+  occurence = 0;
+  prev_pos = 0;
+  while (line[pos] != '\0')
+  {
+    if (line[pos] == 32 || line[pos + 1] == '\0')
+    {
+      // Request - Method
+      if (occurence == 0 && (pos - prev_pos) <= 8)
+      {
+        req->method = custom_allocation(str + prev_pos, (pos - prev_pos));
+      }
+      // Request - Path
+      else if (occurence == 1 && (pos - prev_pos) <= 256)
+      {
+        req->path = custom_allocation(str + prev_pos, (pos - prev_pos));
+      }
+      // Request - Protocol
+      else if (occurence == 2 && (pos - prev_pos) <= 12)
+      {
+        req->protocol = custom_allocation(str + prev_pos, (pos - prev_pos) + 1);
+      }
+      prev_pos = pos + 1;
+      occurence += 1;
+    }
+    pos += 1;
+  }
+  free(line);
+  return (pos + 1);
+}
+
+static size_t get_request_headers(HttpRequest *req, const char *str)
+{
+  size_t i;
+  size_t pos;
+
+  i = 0;
+  pos = ft_strpos(str, "\n\n");
+  req->header_count = 0;
+  while (i < pos + 1 && str[i] != '\0')
+  {
+    if (str[i] == '\n')
+    {
+      req->header_count += 1;
+    }
+    i += 1;
+  }
+  req->headers = custom_allocation(str, pos);
+  return (pos);
+}
+
+static size_t get_request_body(HttpRequest *req, const char *str)
+{
+  size_t i;
+
+  i = 0;
+  while (ft_isspace(str[i]) || str[i] == '\n')
+  {
+    i += 1;
+  }
+  req->body = custom_allocation(str + i, ft_strlen(str) - i);
+  return (i);
+}
+
+HttpRequest *get_request(const char *raw_content)
+{
+  HttpRequest *req;
+  char *duplicate_content;
+  size_t pos_read;
+
+  req = (HttpRequest *) malloc(sizeof(HttpRequest));
+  if (!req)
+  {
+    return (0);
+  }
 
   duplicate_content = ft_strdup(raw_content);
   if (!duplicate_content)
   {
-    free_request(http_request);
+    free_request(req);
     return (0);
   }
 
-  content_line = strtok(duplicate_content, "\n");
-  if (!content_line)
-  {
-    free(duplicate_content);
-    free_request(http_request);
-    return (0);
-  }
+  // Initialize all fields to NULL
+  req->method = NULL;
+  req->path = NULL;
+  req->protocol = NULL;
+  req->headers = NULL;
+  req->body = NULL;
 
-  i = 0;
-  len = 0;
-  while (content_line != NULL)
-  {
-    ft_strdelchar(content_line, '\r');
-    if (i == 0)
-    {
-      get_request_first_line(http_request, content_line);
-      len += ft_strlen(content_line);
-      i += 1;
-      continue;
-    }
-    // Headers & Body
+  // Remove all '\r' characters
+  ft_strdelchar(duplicate_content, '\r');
 
-    // printf("%s\n", content_line);
-    len += ft_strlen(content_line);
-    // Get next content
-    content_line = strtok(NULL, "\n");
-    i += 1;
-  }
+  pos_read = 0;
+  pos_read += get_request_first_line(req, duplicate_content);
+  pos_read += get_request_headers(req, duplicate_content + pos_read);
+  pos_read += get_request_body(req, duplicate_content + pos_read);
 
   free(duplicate_content);
-  return (http_request);
+  return (req);
+}
+
+void parse_request(HttpRequest *req)
+{
+  (void) req;
 }
 
 void free_request(HttpRequest *req)
 {
-  if (req->method)
+  if (req)
   {
-    free(req->method);
+    if (req->method)
+    {
+      free(req->method);
+      req->method = NULL;
+    }
+    if (req->path)
+    {
+      free(req->path);
+      req->path = NULL;
+    }
+    if (req->protocol)
+    {
+      free(req->protocol);
+      req->protocol = NULL;
+    }
+    if (req->headers)
+    {
+      free(req->headers);
+      req->headers = NULL;
+    }
+    if (req->body)
+    {
+      free(req->body);
+      req->body = NULL;
+    }
+    free(req);
   }
-  if (req->path)
-  {
-    free(req->path);
-  }
-  if (req->protocol)
-  {
-    free(req->protocol);
-  }
-  if (req->headers)
-  {
-    free(req->headers);
-  }
-  if (req->body)
-  {
-    free(req->body);
-  }
-  free(req);
 }

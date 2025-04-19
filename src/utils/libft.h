@@ -5,15 +5,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+int ft_isspace(char c);
 void *ft_memset(void *s, int c, size_t n);
 void ft_putchar(const char c);
 void ft_putstr(const char *str);
 int ft_strcmp(const char *s1, const char *s2);
+void ft_strdelchar(char *str, char c);
 char *ft_strdup(const char *str);
 size_t ft_strlcpy(char *dst, const char *src, size_t size);
 size_t ft_strlen(const char *str);
-int ft_isspace(char c);
-
-void ft_strdelchar(char *str, char c);
+size_t ft_strpos(const char *s1, const char *s2);
+char *ft_strstr(const char *haystack, const char *needle);
+void *ft_memcpy(void *dst, const void *src, size_t n);
 
 #endif // LIBFT_H_
