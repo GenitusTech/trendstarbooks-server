@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int ft_isspace(char c);
+int ft_isspace(int c);
 void *ft_memset(void *s, int c, size_t n);
 void ft_putchar(const char c);
 void ft_putstr(const char *str);
@@ -17,5 +17,8 @@ size_t ft_strlen(const char *str);
 size_t ft_strpos(const char *s1, const char *s2);
 char *ft_strstr(const char *haystack, const char *needle);
 void *ft_memcpy(void *dst, const void *src, size_t n);
+int ft_isalpha(int c);
+int ft_toupper(int c);
+char *ft_strtoupper(char *str);
 
 #endif // LIBFT_H_

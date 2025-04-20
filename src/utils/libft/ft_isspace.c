@@ -1,6 +1,6 @@
 #include "../libft.h"
 
-int ft_isspace(char c)
+int ft_isspace(int c)
 {
   // 32 = ' ' (SPACE)
   // 09 = '\t' (HORIZONTAL TABULATION)

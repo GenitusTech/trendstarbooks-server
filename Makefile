@@ -70,6 +70,7 @@ CFLAGS += -Wdouble-promotion# Informs when float is implicitly promoted to doubl
 CFLAGS += -Wmisleading-indentation# Informs about indentation that doesn’t match control flow
 CFLAGS += -Wmissing-prototypes# Ensures functions have prototypes
 CFLAGS += -Wstrict-prototypes# Rejects int foo() in favor of int foo(void)
+CFLAGS += -Wswitch-enum# Checks that switch enum is verified
 
 # Memory & Control-Flow Protection
 CFLAGS += -fstack-protector-strong# Protects against stack smashing
@@ -118,6 +119,7 @@ endif
 # Include Directories
 INCLUDE := \
 	-I./$(SRC_DIR) \
+	-I./$(SRC_DIR)/helper \
 	-I./$(SRC_DIR)/controller \
 	-I./$(SRC_DIR)/middleware \
 	-I./$(SRC_DIR)/model \

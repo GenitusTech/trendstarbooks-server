@@ -46,19 +46,17 @@ void *handle_client(void *arg)
 
   // Fetch HTTP request
   http_request = get_request(raw_content);
-  // Parse request
-  parse_request(http_request);
 
   // Process request
-
+  //
   // Send response
-
+  //
   printf("Method: [%s]\n", http_request->method);
   printf("Path: [%s]\n", http_request->path);
-  printf("Protocol: [%s]\n", http_request->protocol);
-  printf("Headers: [%s]\n", http_request->headers);
-  printf("Body: [%s]\n", http_request->body);
-  printf("Header Count: [%d]\n", http_request->header_count);
+  // printf("Protocol: [%s]\n", http_request->protocol);
+  // printf("Headers: [%s]\n", http_request->headers);
+  // printf("Body: [%s]\n", http_request->body);
+  // printf("Header Count: [%d]\n", http_request->header_count);
 
   free_request(http_request);
   return (0);
