@@ -1,13 +1,10 @@
-#include "../libft.h"
+#include "libft.h"
 
 void ft_putstr(const char *str)
 {
-  size_t i;
-
-  i = 0;
-  while (str[i])
+  while (str && *str)
   {
-    ft_putchar(str[i]);
-    i += 1;
+    ft_putchar(*str);
+    str++;
   }
 }

@@ -1,5 +1,4 @@
 #include "server.h"
-#include <stdlib.h>
 
 #define PORT 8088
 
@@ -9,6 +8,6 @@ int main(void)
 
   init_server(&server, PORT);
   start_server(&server);
-
-  return (EXIT_SUCCESS);
+  exit_server(&server);
+  return (0);
 }

@@ -11,12 +11,13 @@ SPLINT_OPTS := \
 # CLANG (v.19)
 CLANG := clang-19
 CLANG_OPTS := \
-	-std=c99 --analyze -Xanalyzer -analyzer-output=text \
+	-std=c99 --analyze -Xanalyzer -analyzer-checker=unix \
+	-Xclang -analyzer-output=text \
 	-Weverything -Wno-unknown-warning-option
 # CPPCHECK (v.2)
 CPPCHECK := cppcheck
-CPPCHECK_OPTS :=  \
-	--std=c99 --enable=all --inconclusive \
+CPPCHECK_OPTS := \
+	--std=c99 --enable=all --inconclusive --check-config \
 	--suppress=missingIncludeSystem --suppress=unusedFunction \
 	--suppress=unmatchedSuppression \
 	--suppress=variableScope
@@ -119,7 +120,7 @@ endif
 # Include Directories
 INCLUDE := \
 	-I./$(SRC_DIR) \
-	-I./$(SRC_DIR)/helper \
+	-I./$(SRC_DIR)/config \
 	-I./$(SRC_DIR)/controller \
 	-I./$(SRC_DIR)/middleware \
 	-I./$(SRC_DIR)/model \
@@ -137,7 +138,7 @@ $(TARGET): $(OBJ_FILES)
 	$(VALGRIND) $(VALGRIND_OPTS) ./$@ test
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 clean:
 	@$(RM) -frv $(OBJ_FILES) $(TARGET) $(TEMP_FILES)
@@ -152,7 +153,7 @@ analyze-flawfinder:
 
 analyze-cppcheck:
 	@echo "\n=== Running Cppcheck (Static Analysis) ==="
-	$(CPPCHECK) $(CPPCHECK_OPTS) $(HEAD_FILES) $(SRC_FILES)
+	$(CPPCHECK) $(CPPCHECK_OPTS) $(INCLUDE) $(SRC_FILES)
 
 analyze-splint:
 	@echo "\n=== Running Splint (Lint++) ==="
@@ -160,4 +161,4 @@ analyze-splint:
 
 analyze-clang:
 	@echo "\n=== Running Clang Static Analyzer ==="
-	$(CLANG) $(CLANG_OPTS) $(HEAD_FILES) $(SRC_FILES)
+	$(CLANG) $(CLANG_OPTS) $(INCLUDE) $(SRC_FILES)

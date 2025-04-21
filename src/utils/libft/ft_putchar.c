@@ -1,9 +1,6 @@
-#include "../libft.h"
+#include "libft.h"
 
-void ft_putchar(const char c)
+int ft_putchar(int c)
 {
-  if (write(1, &c, 1) < 0)
-  {
-    perror("ft_putchar: cannot write N bytes of BUF to FD");
-  }
+  return ((int) write(1, &c, 1));
 }
