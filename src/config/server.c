@@ -92,17 +92,17 @@ void start_server(Server *server)
   {
     struct sockaddr_in client_addr;
     socklen_t client_len;
-    int fd;
+    int client_fd;
     pthread_t thread_id;
 
     client_len = (socklen_t) sizeof(client_addr);
 
     // Accept client incoming connection.
-    fd = accept(server->server_fd,
+    client_fd = accept(server->server_fd,
                 (struct sockaddr *) &client_addr,
                 &client_len);
 
-    if (fd < 0)
+    if (client_fd < 0)
     {
       if (server->running)
       {
@@ -112,10 +112,10 @@ void start_server(Server *server)
     }
 
     // Create thread
-    if (pthread_create(&thread_id, NULL, handle_client, &fd))
+    if (pthread_create(&thread_id, NULL, handle_client, &client_fd))
     {
       error_log("call on 'pthread_create' has failed");
-      close_connection(fd);
+      close_connection(client_fd);
       continue;
     }
     // Detach thread -> FREE when terminate is completed
@@ -140,48 +140,65 @@ void close_connection(int fd)
 void *handle_client(void *arg)
 {
   // Client file descriptor
-  int fd;
+  int client_fd;
   // Client IP address
-  char ip[INET_ADDRSTRLEN];
+  char client_ip[INET_ADDRSTRLEN];
   // full content read but unfiltered & unparsed
   char content[BUFFER_SIZE];
   // Server request from client
-  HttpRequest http_request;
+  HttpRequest *http_request;
   // Server response for client
-  HttpResponse http_response;
+  HttpResponse *http_response;
 
   // Get file descriptor integer
-  fd = *(int *) arg;
+  client_fd = *(int *) arg;
 
   // Get client IP
-  get_client_ip(fd, ip, INET_ADDRSTRLEN);
-  if (!ft_strlen(ip))
+  get_client_ip(client_fd, client_ip, INET_ADDRSTRLEN);
+  if (!ft_strlen(client_ip))
   {
     error_log("could not retreive client IP");
-    return (void *) (1); // EXIT WITH ERROR
+    return ((void *) 1); // EXIT WITH ERROR
   }
 
   // Get client content
-  get_client_content(fd, content, BUFFER_SIZE);
+  get_client_content(client_fd, content, BUFFER_SIZE);
   if (!ft_strlen(content))
   {
     error_log("could not retreive client content");
-    return (void *) (1); // EXIT WITH ERROR
+    return ((void *) 1); // EXIT WITH ERROR
   }
 
-  get_request(&http_request, content);
-  get_response(&http_request, &http_response);
+  http_request = get_request(content);
+  handle_request(http_request);
 
-  free_request(&http_request);
-  free_response(&http_response);
+  http_response = get_response(http_request);
+  handle_response(client_fd, http_response);
+
+  // ft_putchar('\n');
+  // ft_putstr("METHOD: ");
+  // ft_putstr(http_request->method);
+  // ft_putchar('\n');
+  // ft_putstr("PATH: ");
+  // ft_putstr(http_request->path);
+  // ft_putchar('\n');
+  // ft_putstr("PROTOCOL: ");
+  // ft_putstr(http_request->protocol);
+  // ft_putchar('\n');
+  // ft_putstr("HEADERS: ");
+  // ft_putstr(http_request->headers);
+  // ft_putchar('\n');
+  // ft_putstr("BODY: ");
+  // ft_putstr(http_request->body);
+  // ft_putchar('\n');
+
+  free_request(http_request);
+  free_response(http_response);
+
+  // Close connection
+  close_connection(client_fd);
 
   return (0);
-}
-
-void exit_server(Server *server)
-{
-  close_connection(server->server_fd);
-  ft_putstr("Server stopped\n");
 }
 
 void get_client_ip(int fd, char *ip, size_t size)

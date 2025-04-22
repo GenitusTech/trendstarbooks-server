@@ -24,7 +24,6 @@ void handle_signal(int signal);
 void start_server(Server *server);
 void close_connection(int fd);
 void *handle_client(void *arg);
-void exit_server(Server *server);
 void get_client_ip(int fd, char *ip, size_t size);
 void get_client_content(int fd, char *content, size_t size);
 

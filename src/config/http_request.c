@@ -2,13 +2,15 @@
 #include "libft.h"
 #include "log.h"
 
-void get_request(HttpRequest *req, const char *content)
+HttpRequest *get_request(const char *content)
 {
+  HttpRequest *req;
+
   req = (HttpRequest *) malloc(sizeof(HttpRequest));
   if (!req)
   {
     error_log("could not allocate http_request");
-    return;
+    return (0);
   }
   req->method = NULL;
   req->path = NULL;
@@ -17,13 +19,13 @@ void get_request(HttpRequest *req, const char *content)
   req->body = NULL;
 
   (void) content;
-  // free(req);
+  return (req);
 }
+
 void free_request(HttpRequest *req)
 {
   if (req)
   {
-
     if (req->method)
     {
       free(req->method);
@@ -51,4 +53,9 @@ void free_request(HttpRequest *req)
     }
     free(req);
   }
+}
+
+void handle_request(HttpRequest *req)
+{
+  (void) req;
 }

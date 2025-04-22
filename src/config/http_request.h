@@ -13,7 +13,8 @@ struct SRequest
 };
 typedef struct SRequest HttpRequest;
 
-void get_request(HttpRequest *req, const char *content);
+HttpRequest *get_request(const char *content);
 void free_request(HttpRequest *req);
+void handle_request(HttpRequest *req);
 
 #endif // HTTP_REQUEST_H_
