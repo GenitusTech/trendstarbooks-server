@@ -29,7 +29,12 @@ CHECKSEC := checksec
 CHECKSEC_OPTS := --debug --file=
 # VALGRIND (v.3)
 VALGRIND := valgrind
-VALGRIND_OPTS := -s --leak-check=full
+VALGRIND_OPTS :=  \
+	-s \
+	--leak-check=full \
+	--show-leak-kinds=all \
+	--track-origins=yes \
+	--verbose
 
 # Analysis Directory
 ANALYSIS_DIR := analysis
@@ -106,7 +111,7 @@ LDFLAGS += -pie# ASLR-enabled executable
 endif
 
 ifeq ($(BUILD),debug)
-CC += -ggdb
+CC += -ggdb3
 
 CFLAGS += -Og#
 CFLAGS += -g3# Adds debug symbols (useful for gdb)
@@ -130,12 +135,11 @@ INCLUDE := \
 
 LIBS = -lpthread
 
-all: clean $(TARGET)
+all: clean $(TARGET) analyze
 
 $(TARGET): $(OBJ_FILES)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDE) $(LIBS) -o $@ $^
 	$(CHECKSEC) $(CHECKSEC_OPTS)$@
-	$(VALGRIND) $(VALGRIND_OPTS) ./$@ test
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
@@ -143,7 +147,12 @@ $(TARGET): $(OBJ_FILES)
 clean:
 	@$(RM) -frv $(OBJ_FILES) $(TARGET) $(TEMP_FILES)
 
-analyze: analyze-flawfinder analyze-cppcheck analyze-splint analyze-clang
+analyze: \
+	analyze-flawfinder \
+	analyze-cppcheck \
+	analyze-splint \
+	analyze-clang \
+	analyze-valgrind
 
 .PHONY: all clean debug production analyze
 
@@ -162,3 +171,7 @@ analyze-splint:
 analyze-clang:
 	@echo "\n=== Running Clang Static Analyzer ==="
 	$(CLANG) $(CLANG_OPTS) $(INCLUDE) $(SRC_FILES)
+
+analyze-valgrind:
+	@echo "\n=== Running Valgrind Analyzer ==="
+	$(VALGRIND) $(VALGRIND_OPTS) ./$(TARGET) | exit 0
