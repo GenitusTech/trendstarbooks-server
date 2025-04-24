@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define MAX_CONNECTIONS 10
 

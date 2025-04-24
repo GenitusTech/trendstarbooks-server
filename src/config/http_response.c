@@ -27,6 +27,8 @@ const char *http_status_text[] = {
 
 HttpResponse *get_response(HttpRequest *req)
 {
+  (void) req;
+
   HttpResponse *res;
 
   res = (HttpResponse *) malloc(sizeof(HttpResponse));
@@ -35,10 +37,19 @@ HttpResponse *get_response(HttpRequest *req)
     error_log("could not allocate http_response");
     return (0);
   }
-  res->body = NULL;
-  res->status_code = 0;
 
-  (void) req;
+  char body[38] = "{\"message\":\"Your Request is OK!\"}";
+  char ctype[17] = "application/json";
+
+  res->body = (char *) malloc(sizeof(char) * ft_strlen(body) + 1);
+  (void) ft_strlcpy(res->body, body, ft_strlen(body));
+
+  res->content_type = (char *) malloc(sizeof(char) * ft_strlen(ctype) + 1);
+  (void) ft_strlcpy(res->content_type, ctype, ft_strlen(ctype));
+
+  res->content_length = ft_strlen(res->body);
+  res->status_code = 200;
+
   return (res);
 }
 
@@ -50,6 +61,12 @@ void free_response(HttpResponse *res)
     {
       free(res->body);
     }
+    if (res->content_type)
+    {
+      free(res->content_type);
+    }
+
+    res->content_length = 0;
     res->status_code = 0;
     free(res);
   }
@@ -57,8 +74,27 @@ void free_response(HttpResponse *res)
 
 void handle_response(int fd, HttpResponse *res)
 {
-  (void) res;
-  send_response(fd, HTTP_OK, "application/json", "{\"message\":\"OK\"}");
+  size_t header_length;
+  char header_response[1024];
+
+  header_length = (size_t) snprintf(header_response,
+                           sizeof(header_response),
+                           "HTTP/1.1 %hu %s\r\n"
+                           "Content-Type: %s\r\n"
+                           "Content-Length: %lu\r\n"
+                           "Connection: close\r\n"
+                           "\r\n",
+                           res->status_code,
+                           http_status_text[res->status_code],
+                           res->content_type,
+                           res->content_length);
+
+  (void) write(fd, header_response, header_length);
+
+  if (res->body && res->content_length > 0)
+  {
+    (void) write(fd, res->body, res->content_length);
+  }
 }
 
 void send_response(int client_fd,

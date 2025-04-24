@@ -3,6 +3,7 @@
 
 #include "http_request.h"
 #include <stdio.h>
+#include <sys/socket.h>
 
 // HTTP Status Code Definitions
 #define HTTP_CONTINUE              100
@@ -26,8 +27,10 @@
 
 struct SResponse
 {
-  unsigned short int status_code;
   char *body;
+  char *content_type;
+  size_t content_length;
+  unsigned short int status_code;
 };
 typedef struct SResponse HttpResponse;
 

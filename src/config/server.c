@@ -4,9 +4,6 @@
 #include "libft.h"
 #include "log.h"
 
-#include <pthread.h>
-#include <stdlib.h>
-
 // Server instance to maintain the server information on callbacks.
 Server *server_instance = 0;
 
@@ -99,8 +96,8 @@ void start_server(Server *server)
 
     // Accept client incoming connection.
     client_fd = accept(server->server_fd,
-                (struct sockaddr *) &client_addr,
-                &client_len);
+                       (struct sockaddr *) &client_addr,
+                       &client_len);
 
     if (client_fd < 0)
     {
@@ -112,7 +109,7 @@ void start_server(Server *server)
     }
 
     // Create thread
-    if (pthread_create(&thread_id, NULL, handle_client, &client_fd))
+    if (pthread_create(&thread_id, ((void *) 0), handle_client, &client_fd))
     {
       error_log("call on 'pthread_create' has failed");
       close_connection(client_fd);
@@ -155,7 +152,7 @@ void *handle_client(void *arg)
 
   // Get client IP
   get_client_ip(client_fd, client_ip, INET_ADDRSTRLEN);
-  if (!ft_strlen(client_ip))
+  if (ft_strlen(client_ip) < 1)
   {
     error_log("could not retreive client IP");
     return ((void *) 1); // EXIT WITH ERROR
@@ -163,34 +160,23 @@ void *handle_client(void *arg)
 
   // Get client content
   get_client_content(client_fd, content, BUFFER_SIZE);
-  if (!ft_strlen(content))
+  if (ft_strlen(content) < 1)
   {
     error_log("could not retreive client content");
     return ((void *) 1); // EXIT WITH ERROR
   }
 
   http_request = get_request(content);
-  handle_request(http_request);
+  if (http_request)
+  {
+    handle_request(http_request);
+  }
 
   http_response = get_response(http_request);
-  handle_response(client_fd, http_response);
-
-  // ft_putchar('\n');
-  // ft_putstr("METHOD: ");
-  // ft_putstr(http_request->method);
-  // ft_putchar('\n');
-  // ft_putstr("PATH: ");
-  // ft_putstr(http_request->path);
-  // ft_putchar('\n');
-  // ft_putstr("PROTOCOL: ");
-  // ft_putstr(http_request->protocol);
-  // ft_putchar('\n');
-  // ft_putstr("HEADERS: ");
-  // ft_putstr(http_request->headers);
-  // ft_putchar('\n');
-  // ft_putstr("BODY: ");
-  // ft_putstr(http_request->body);
-  // ft_putchar('\n');
+  if (http_response)
+  {
+    handle_response(client_fd, http_response);
+  }
 
   free_request(http_request);
   free_response(http_response);
