@@ -1,0 +1,45 @@
+[package]
+name = "trendstarbooks-server"
+version = "0.1.0"
+edition = "2024"
+authors = ["Genitus Tech <contact@genitus.tech>"]
+description = "Server API of TrendStarBooks using RUST"
+readme = "README.md"
+license-file = "LICENSE"
+repository = "https://github.com/GenitusTech/trendstarbooks-server"
+keywords = ["api", "rust", "server", "trendstarbooks"]
+
+[dependencies]
+actix-cors = { version = "0.7" }
+actix-identity = "0.8.0"
+actix-session = { version = "0.10.1", features = ["cookie-session"] }
+actix-web = { version = "4", features = ["openssl"] }
+dotenv = { version = "0.15" }
+env_logger = { version = "0.11" }
+garde = { version = "0.22.0", features = ["full"] }
+log = "0.4.27"
+num = "0.4.3"
+openssl = { version = "0.10.72", features = ["vendored"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
+# actix-cors = { version = "0.7.1" }
+# actix-identity = { version = "0.8.0" }
+# actix-session = { version = "0.10.1", features = ["cookie-session"]}
+# actix-web = { version = "4" }
+# headers = { version = "0.4.0" }
+# dotenv = "0.15"
+# env_logger = { version = "0.11" }
+# log = { version = "0.4" }
+# serde = {version = "1.0" }
+# serde_json = { version = "1.0" }
+# validator = { version = "0.20.0", features = ["derive"] }
+
+[profile.dev]
+opt-level = 3
+debug = true
+debug-assertions = true
+overflow-checks = true
+panic = "unwind"
+
+[lints.rust]
+unsafe_code = "forbid"

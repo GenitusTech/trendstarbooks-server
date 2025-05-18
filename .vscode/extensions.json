@@ -1,21 +1,9 @@
 {
-  "recommendations": [
-    "editorconfig.editorconfig",
-    "yzhang.markdown-all-in-one",
-    "redhat.vscode-yaml",
-    "usernamehw.errorlens",
-    "jock.svg",
-    "franneck94.workspace-formatter",
-    "adpyke.codesnap",
-    "jbenden.c-cpp-flylint",
-    "ms-vscode.cpptools-extension-pack",
-    "ms-vscode.makefile-tools",
-    "kylinideteam.cmake-intellisence",
-    "josetr.cmake-language-support-vscode",
-    "ms-dotnettools.vscode-dotnet-runtime",
-    "msazurermtools.azurerm-vscode-tools",
-    "ms-vscode.cmake-tools",
-    "cheshirekow.cmake-format",
-    "ms-vscode.cpptools"
-  ]
+    "recommendations": [
+        "editorconfig.editorconfig",
+        "rust-lang.rust-analyzer",
+        "vadimcn.vscode-lldb",
+        "formulahendry.code-runner",
+        "dustypomerleau.rust-syntax"
+    ]
 }
