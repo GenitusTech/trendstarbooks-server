@@ -1,0 +1,7 @@
+{
+  "errorLens.codeLensEnabled": true,
+  "errorLens.codeLensOnClick": "showQuickFix",
+  "dependi.rust.informPatchUpdates": true,
+  "editor.formatOnSave": true,
+  "rust-analyzer.check.command": "clippy"
+}

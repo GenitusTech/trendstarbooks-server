@@ -1,45 +1,52 @@
 [package]
-name = "trendstarbooks-server"
+name = "trendstarbooks"
 version = "0.1.0"
 edition = "2024"
-authors = ["Genitus Tech <contact@genitus.tech>"]
-description = "Server API of TrendStarBooks using RUST"
-readme = "README.md"
-license-file = "LICENSE"
-repository = "https://github.com/GenitusTech/trendstarbooks-server"
-keywords = ["api", "rust", "server", "trendstarbooks"]
+rust-version = "1.87"
 
-[dependencies]
-actix-cors = { version = "0.7" }
-actix-identity = "0.8.0"
-actix-session = { version = "0.10.1", features = ["cookie-session"] }
-actix-web = { version = "4", features = ["openssl"] }
-dotenv = { version = "0.15" }
-env_logger = { version = "0.11" }
-garde = { version = "0.22.0", features = ["full"] }
-log = "0.4.27"
-num = "0.4.3"
-openssl = { version = "0.10.72", features = ["vendored"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0" }
-# actix-cors = { version = "0.7.1" }
-# actix-identity = { version = "0.8.0" }
-# actix-session = { version = "0.10.1", features = ["cookie-session"]}
-# actix-web = { version = "4" }
-# headers = { version = "0.4.0" }
-# dotenv = "0.15"
-# env_logger = { version = "0.11" }
-# log = { version = "0.4" }
-# serde = {version = "1.0" }
-# serde_json = { version = "1.0" }
-# validator = { version = "0.20.0", features = ["derive"] }
+# Standard metadata that helps with security maintenance
+authors = ["GJM <contact@genitus.tech>"]
+description = "Server Web API for TrendStarBooks coded in RUST"
+license = "Apache-2.0"
+repository = "https://github.com/GenitusTech/trendstarbooks-server"
+readme = "README.md"
 
 [profile.dev]
-opt-level = 3
-debug = true
-debug-assertions = true
-overflow-checks = true
-panic = "unwind"
+opt-level = 0      # No optimizations for faster compile times
+debug = true       # Include debug info
+incremental = true # Faster incremental compilation
 
-[lints.rust]
-unsafe_code = "forbid"
+[profile.release]
+opt-level = "z"   # Optimize for size (reduces attack surface)
+lto = "fat"       # Aggressive link-time optimizations
+codegen-units = 1 # Better optimization (slower compile)
+panic = "abort"   # No unwinding (smaller binary, fewer exploits)
+strip = "symbols" # Remove debug symbols in release
+debug = false     # No debug info in production
+
+[dependencies]
+actix-cors = "0.7.1"
+actix-csrf = "0.8.0"
+actix-files = "0.6.6"
+actix-identity = "0.8.0"
+actix-web = { version = "4.11.0", features = ["openssl"] }
+config = "0.15.11"
+governor = "0.10.0"
+openssl = { version = "0.10.73", features = ["vendored"] }
+rand = "0.9.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+zeroize = "1.8.1"
+
+[dev-dependencies]
+cargo-audit = "0.21.2"
+cargo-crev = "0.26.4"
+cargo-deny = "0.18.3"
+cargo-geiger = "0.12.0"
+clippy = "0.0.302"
+
+[workspace]
+
+[features]
+
+debug = []
